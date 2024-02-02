@@ -23,6 +23,8 @@ const RegisterPage = () => {
     handleSubmit,
     formState: { errors },
   } = useForm<IFormInput>({ resolver: yupResolver(registerSchema) });
+
+  //** Handlers */
   const onSubmit: SubmitHandler<IFormInput> = async (data) => {
     console.log(data);
     setIsLoading(true);
