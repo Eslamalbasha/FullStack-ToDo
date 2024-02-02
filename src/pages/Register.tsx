@@ -5,6 +5,11 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { REGISTER_FROM } from "../data";
 import { registerSchema } from "../validation";
+import axiosInstance from "../config/axios.config";
+import toast from "react-hot-toast";
+import { useState } from "react";
+import { AxiosError } from "axios";
+import { IErrorResponse } from "../interface";
 
 interface IFormInput {
   username: string;
@@ -12,14 +17,48 @@ interface IFormInput {
   password: string;
 }
 const RegisterPage = () => {
+  const [isLoading, setIsLoading] = useState(false);
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<IFormInput>({ resolver: yupResolver(registerSchema) });
-  const onSubmit: SubmitHandler<IFormInput> = (data) => {
+  const onSubmit: SubmitHandler<IFormInput> = async (data) => {
     console.log(data);
+    setIsLoading(true);
+    try {
+      // ** fulfilled => success(optional)
+      const { status } = await axiosInstance.post("/auth/local/register", data);
+
+      if (status === 200) {
+        toast.success(
+          "you will navigate to the login page after 4 secand to login !",
+          {
+            position: "bottom-center",
+            duration: 4000,
+            style: {
+              backgroundColor: "black",
+              color: "white",
+              width: "fit-content",
+            },
+          }
+        );
+      }
+    } catch (errors) {
+      //** rejected => field => (optional) */
+
+      // ** to return error from axios
+      const errorObject = errors as AxiosError<IErrorResponse>;
+      console.log(errorObject.response?.data.error.message);
+      toast.error(`${errorObject.response?.data.error.message}`, {
+        position: "bottom-center",
+        duration: 4000,
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
+
   // ** بيقدر المستخدم يوصل لل Data عن طريق هاد object
 
   // ** Render
@@ -45,7 +84,9 @@ const RegisterPage = () => {
       </h2>
       <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
         {renderRegisterForm}
-        <Button fullWidth>Register</Button>
+        <Button fullWidth isLoading={isLoading}>
+          Register
+        </Button>
       </form>
     </div>
   );

@@ -8,3 +8,13 @@ export interface IRegisterInput {
     pattern?: RegExp;
   };
 }
+export interface IErrorResponse {
+  error: {
+    delails?: {
+      errors: {
+        message: string;
+      }[];
+    };
+    message?: string;
+  };
+}
